@@ -1,2 +1,5 @@
 nltk
 scipy
+pandas
+OpenAI
+numpy
