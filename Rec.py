@@ -105,10 +105,10 @@ if st.session_state.clicked:
             df = pd.DataFrame(data_dict)
             st.dataframe(df)
             with open('rec_result.txt', 'w') as f:
-                    msg="User name is "+ name+". User reseach interests are "+keywords+". Top 3 recommended advisor list:\n"
+                    msg="User name is "+ name+". User research interests are "+keywords+". Top 3 recommended advisor list:\n"
                     for i in range(len(data_dict['Ranking'])):
-                        msg+=str(i)+'. name: '+ data_dict['Name'][i]
-                        msg+='. Similarity score: '+str(data_dict['Similarity Score'][i])
+                        msg+=str(i+1)+'. name: '+ data_dict['Name'][i]
+                        msg+='. Similarity score: '+str(data_dict['Cosine Similarity Score'][i])
                         msg+='. Keywords: '+data_dict['Keywords'][i]+'\n'
                     f.write(msg)
 
