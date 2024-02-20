@@ -108,7 +108,7 @@ if st.session_state.clicked:
                     msg="User name is "+ name+". User research interests are "+keywords+". Top 3 recommended advisor list:\n"
                     for i in range(len(data_dict['Ranking'])):
                         msg+=str(i+1)+'. name: '+ data_dict['Name'][i]
-                        msg+='. Similarity score: '+str(data_dict['Cosine Similarity Score'][i])
+                        msg+='. Cosine Similarity score: '+str(data_dict['Similarity Score'][i])
                         msg+='. Keywords: '+data_dict['Keywords'][i]+'\n'
                     f.write(msg)
 
