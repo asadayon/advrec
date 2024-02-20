@@ -111,6 +111,8 @@ if st.session_state.clicked:
                         msg+='. Cosine Similarity score: '+str(data_dict['Similarity Score'][i])
                         msg+='. Keywords: '+data_dict['Keywords'][i]+'\n'
                     f.write(msg)
+                    st.session_state.clicked = False
+             
 
            
 
