@@ -97,12 +97,13 @@ data_dict={}
 flag=0
 if st.session_state.clicked:
     #with st.chat_message("Assistant"):
+        st.session_state.clicked = False
         st.write("Hello "+name+"! Please wait while we retrieve some information.")
         import time
         with st.spinner(text='In progress'):
             output=cosine_recommender(keywords)           
             data_dict = json.loads(output)
-            st.session_state.clicked = False
+            
             if "openai_model" not in st.session_state:
                 st.session_state["openai_model"] = "gpt-3.5-turbo"
             if "flag" not in st.session_state:          
