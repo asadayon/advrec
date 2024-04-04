@@ -7,7 +7,7 @@ from  scipy.spatial.distance import cosine
 from heapq import nsmallest,nlargest
 from openai import OpenAI
 
-
+st.set_page_config("Advisor Recommendation", page_icon=":book:")
 data = pd.read_csv('my_dataframe.csv')
 
 count_vector={}
@@ -22,6 +22,7 @@ with open('Term_set.json', 'r') as f:
 def tokenize(txt):
   txt=str(txt)
   txt = txt.replace(';',' ')
+  txt = txt.replace(',',' ')
   return txt.split()
 
 def porter_stemmer(words):
@@ -166,7 +167,7 @@ def LDA(keywords):
     punc=''',;.'''
     for i in punc:
         if i in new_doc:
-            new_doc.replace(i,'')
+            new_doc.replace(i,' ')
     new_doc=new_doc.split()
     new_doc=porter_stemmer(new_doc)  
     
@@ -262,8 +263,8 @@ if st.session_state.clicked:
             data_dict = json.loads(output)
             
             lda1,lda2=LDA(keywords)
-            soc=social_network(data_dict)
-            soc = json.loads(soc)
+            #soc=social_network(data_dict)
+            #soc = json.loads(soc)
             #lda1=json.loads(lda1)
             #lda2=json.loads(lda2)
             
@@ -296,14 +297,16 @@ if st.session_state.clicked:
                             #msg+='. Cosine similarity score: '+str(data_dict['Similarity Score'][i])
                             msg+='. Keywords: '+" ".join(lda2['Words'][i])+'\n'
                         f.write(msg)
-            if "soc" not in st.session_state:
-                st.session_state["soc"] = soc
-                with open('rec_result.txt', 'a') as f:
-                        msg="\nTop recommended advisor list based on Social modeling:\n"
-                        for i in range(len(soc['Name'])):
-                            msg+=str(i+1)+'. name: '+ soc['Name'][i]
-                            msg+='. Keywords: '+soc['Keywords'][i]+'\n'
-                        f.write(msg)
+            
+#             if "soc" not in st.session_state:
+#                 st.session_state["soc"] = soc
+#                 with open('rec_result.txt', 'a') as f:
+#                         msg="\nTop recommended advisor list based on Social modeling:\n"
+#                         for i in range(len(soc['Name'])):
+#                             msg+=str(i+1)+'. name: '+ soc['Name'][i]
+#                             msg+='. Keywords: '+soc['Keywords'][i]+'\n'
+#                         f.write(msg)
+            
 
             if "messages" not in st.session_state:
                 msg="" 
@@ -323,21 +326,17 @@ if "flag" in st.session_state:
     df1 = pd.DataFrame(st.session_state["flag"])
     df2 = pd.DataFrame(st.session_state["lda1"])
     df3 = pd.DataFrame(st.session_state["lda2"])
-    df4 = pd.DataFrame(st.session_state["soc"])
     
-    df1_new = df1[['Ranking', 'Name']]
-    st.write("Top 3 recommended advisor based on Cosine Similarity of keywords:")
-    st.dataframe(df1_new)
-    st.write("Top 3 recommended advisor based on LDA Topic Similarity of 20 topics:")
-    df2_new = df2[['LDA_rank','LDA_Name' ]]
-    st.dataframe(df2_new)
+    left_column, right_column = st.columns(2)
+    with left_column:
+        df1_new = df1[['Ranking', 'Name']]
+        st.write("Top 3 recommended advisor based on Cosine Similarity of keywords:")
+        st.dataframe(df1_new, hide_index=True)
+    with right_column:
+        st.write("Top 3 recommended advisor based on LDA Topic Similarity of 30 topics:")
+        df2_new = df2[['LDA_rank','LDA_Name' ]]
+        st.dataframe(df2_new,hide_index=True)
     
-    if len(df4)!=0:          
-        df4_new = df3[['Name']]
-        st.write("Top recommended advisor based on Social connectivity:")
-        st.dataframe(df4_new)
-    else:
-        st.write("Didn't find any from Social connectivity:")
 
     
             
@@ -356,7 +355,7 @@ if "messages"  in st.session_state:
                 st.markdown(message["content"])
 
 
-    if prompt := st.chat_input("Type here..."):
+    if prompt := st.chat_input("Example: 1. Tell me the research interests of the recommended advisor based on cosine similarity. \n2. Tell me why 'X' is recommended.\n 3. What is cosine similarity."):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user",avatar="👦"):
             st.markdown(prompt)
