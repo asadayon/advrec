@@ -1,6 +1,7 @@
 nltk
+gensim
 scipy
 pandas
 OpenAI
 numpy
-gensim
+
