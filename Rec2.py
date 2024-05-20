@@ -256,7 +256,7 @@ flag=0
 if st.session_state.clicked:
     #with st.chat_message("Assistant"):
         st.session_state.clicked = False
-        st.write("Hello "+name+"! Please wait while we retrieve some information.")
+        #st.write("Hello "+name+"! Please wait while we retrieve some information.")
         import time
         with st.spinner(text='In progress'):
             output=cosine_recommender(keywords)           
