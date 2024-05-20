@@ -248,7 +248,7 @@ def click_button():
 
 st.title("Advisor Recommender System ")
 name=st.text_input('Enter your Name')
-keywords=st.text_area('Enter keywords of your reseach interest')
+keywords=st.text_input('Enter keywords of your reseach interest')
 
 st.button('Submit', on_click=click_button)
 data_dict={}
@@ -320,7 +320,7 @@ if st.session_state.clicked:
             You may explain based on research interests are similar, and why. If the user asks about the cosine similarity score, which has a value of 0 to 1, you may use different examples to describe the similarity score.\
             You respond in a short, very conversational friendly style. 
             """}]
-                response="Welcome "+name+" to the Advisor Recommender System. Would you like an explaination of your recommendation for advisors?"
+                response="Welcome "+name+"! Would you like recommendation explaination?"
                 st.session_state.messages.append({"role": "assistant", "content": response})
 if "flag" in st.session_state:
     df1 = pd.DataFrame(st.session_state["flag"])
@@ -330,10 +330,10 @@ if "flag" in st.session_state:
     left_column, right_column = st.columns(2)
     with left_column:
         df1_new = df1[['Ranking', 'Name']]
-        st.write("Top 3 recommended advisor based on Cosine Similarity of keywords:")
+        st.write("Top Text Similarity Recommendations:")
         st.dataframe(df1_new, hide_index=True)
     with right_column:
-        st.write("Top 3 recommended advisor based on LDA Topic Similarity of 30 topics:")
+        st.write("Top Topic Similarity Recommendations:")
         df2_new = df2[['LDA_rank','LDA_Name' ]]
         st.dataframe(df2_new,hide_index=True)
     
