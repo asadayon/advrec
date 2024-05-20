@@ -246,7 +246,7 @@ def click_button():
     st.session_state.clicked = True
 
 
-st.header("Advisor Recommender System ")
+st.subheader("Advisor Recommender System ")
 name=st.text_input('Enter your Name')
 keywords=st.text_input('Enter keywords of your reseach interest')
 
