@@ -264,7 +264,7 @@ def click_button():
 st.title("Advisor Recommender System ")
 st.write("This study aims to assess users' understanding of social recommendation explanations provided by a large language model (LLM) integrated into this System.  ")
 name=st.text_input('Enter your Name')
-keywords=st.text_input('Enter keywords of your reseach interest (i.e. Machine Learning, Natural Language Processing, Cybersecurity, Cryptography, Data Science, Big Data Analytics, Computer Vision, Human Computer Interaction, Robotics,  Software Engineering, Cloud Computing, etc)')
+keywords=st.text_input('Enter keywords of your reseach interest (i.e. Machine Learning, Natural Language Processing, Cybersecurity, Cryptography, Data Science, Human Computer Interaction, Robotics,  Software Engineering, Cloud Computing, etc)')
 
 st.button('Submit', on_click=click_button)
 data_dict={}
