@@ -4,4 +4,4 @@ scipy==1.10.1
 pandas
 OpenAI
 numpy
-st_aggrid
+st-aggrid
