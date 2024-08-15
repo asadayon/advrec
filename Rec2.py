@@ -262,8 +262,9 @@ def click_button():
 
 
 st.title("Advisor Recommender System ")
+st.write("This study aims to assess users' understanding of social recommendation explanations provided by a large language model (LLM) integrated into this System.  ")
 name=st.text_input('Enter your Name')
-keywords=st.text_input('Enter keywords of your reseach interest')
+keywords=st.text_input('Enter keywords of your reseach interest (i.e. Machine Learning, Natural Language Processing, Cybersecurity, Cryptography, Data Science, Big Data Analytics, Computer Vision, Human Computer Interaction, Robotics,  Software Engineering, Cloud Computing, etc)')
 
 st.button('Submit', on_click=click_button)
 data_dict={}
@@ -330,10 +331,13 @@ if st.session_state.clicked:
                                     msg+=line
                               
                 st.session_state.messages = [{'role':'system', 'content':msg+"""
-            You are an Advisor Recommendation System, you will explain why any advisor is recommended to the user. Recommendations were given based on the cosine similarity and LDA Topic similarity of user research interest and advisor research interest keywords. \
-            You are given a username and three recommended advisor names to the user. You are also provided with user research interests, and research interests of three recommended advisors. \
-            You may explain based on research interests are similar, and why. If the user asks about the cosine similarity score, which has a value of 0 to 1, you may use different examples to describe the similarity score.\
-            You respond in a short, very conversational friendly style. 
+            An Advisor Recommendation System where recommendations are generated based on two models: text similarity and LDA topic similarity between the user's research interests and those of potential advisors.
+ Input: You are given a username and three recommended advisor names to the user based on each model. You are also provided with user research interests, and research interests of three recommended advisors. 
+Objective: To guide users through understanding the reasoning behind advisor recommendations based on cosine similarity, and LDA topic similarity. The goal is to enhance users' technical comprehension of how their research interests align with those of the recommended advisors.
+Expected Outcome: Users should gain a clear understanding of why specific advisors were recommended, with explanations tailored to their research interests. Users should be able to grasp the concepts of cosine similarity, topic similarity via LDA, and accurately interpret recommendation scores.
+Do not provide overly technical jargon unless asked by the user. Do not give lengthy explanations; keep responses concise and user-friendly. Do not assume the user understands complex mathematical concepts; provide examples when necessary.
+Model Output:
+ 
             """}]
                 response="Welcome "+name+"! Would you like an explanation of your recommendation for advisors?"
                 st.session_state.messages.append({"role": "assistant", "content": response})
