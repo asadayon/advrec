@@ -5,3 +5,4 @@ pandas
 OpenAI
 numpy
 streamlit-aggrid
+matplotlib
