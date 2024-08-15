@@ -6,9 +6,10 @@ import numpy as np
 from  scipy.spatial.distance import cosine
 from heapq import nsmallest,nlargest
 from openai import OpenAI
+from st_aggrid import AgGrid, JsCode, GridOptionsBuilder
 
 st.set_page_config("Advisor Recommendation", page_icon=":book:")
-data = pd.read_csv('my_dataframe.csv')
+data = pd.read_csv('updated_dataframe.csv')
 
 count_vector={}
 with open('my_dict.json', 'r') as f:
@@ -54,22 +55,30 @@ def cosine_recommender(doc):
     user=[]
     score=[]
     kw=[]
+    publication=[]
+    affiliation=[]
     count=1
     for i in rec_adv:
                    rank.append(count)
                    user.append(i)
                    score.append(user_score[i])
                    a=data[data['n']==i]['t']
+                   publication.append(data[data['n']==i]['paper_list'].values[0])
+                   affiliation.append(data[data['n']==i]['affiliation'].values[0])
+                 
                    for j in a: 
                         k=" ".join(tokenize(j))
                         #k=tokenize(j)
                    kw.append(k)
+                   print(kw)
                    count+=1
     df = {
                                         'Ranking': rank,
                                         'Name': user,
                                         'Similarity Score': score,
-                                        'Keywords': kw
+                                        'Keywords': kw,
+                                        'Publication':publication,
+                                        'Affiliation':affiliation
                                     }
     data_str = json.dumps(df)
     
@@ -149,7 +158,7 @@ def LDA(keywords):
     import ast
     import string
 
-    data = pd.read_csv('my_dataframe.csv')
+    
     lda_model = models.LdaModel.load('lda_model.model')
     dictionary = corpora.Dictionary.load('dictionary.dict')
     index = similarities.MatrixSimilarity.load('index_file.index')
@@ -160,6 +169,8 @@ def LDA(keywords):
     names=[]
     sim=[]
     kw=[]
+    publication=[]
+    affiliation=[]
 
 
     #new_doc = ['end', 'user', 'parallel', 'program', 'liter', 'program', 'key', 'practic', 'program', 'style', 'end-us', 'softwar', 'engin', 'softwar', 'develop', 'end-us', 'program', 'situat', 'program', 'experi', 'program', 'standard']
@@ -175,7 +186,7 @@ def LDA(keywords):
 
     new_doc_distribution = lda_model.get_document_topics(new_doc_bow)
     sorted_doc_topics = sorted(new_doc_distribution, key=lambda x: -x[1])
-    top3_topics = sorted_doc_topics[:1]
+    top3_topics = sorted_doc_topics[:3]
     for topic, prob in top3_topics:
         print(f"Topic {topic} with probability {prob}")
         top_words = lda_model.show_topic(topic, 10)
@@ -199,6 +210,8 @@ def LDA(keywords):
         rank.append(count)
         names.append(data['n'][doc_position])
         a=data['t'][doc_position]
+        publication.append(data['paper_list'][doc_position])
+        affiliation.append(data['affiliation'][doc_position])
         #a=data[data['n']==i]['t']
         a=a.replace(";"," ")
                   
@@ -210,7 +223,9 @@ def LDA(keywords):
                                         'LDA_rank': rank,
                                         'LDA_Name': names,
                                         'Score': sim,
-                                        'Keywords_LDA': kw
+                                        'Keywords_LDA': kw,
+                                        'Publication':publication,
+                                        'Affiliation':affiliation
                                        
                                     }
     #data_str1 = json.dumps(df1)
@@ -246,7 +261,7 @@ def click_button():
     st.session_state.clicked = True
 
 
-st.subheader("Advisor Recommender System ")
+st.title("Advisor Recommender System ")
 name=st.text_input('Enter your Name')
 keywords=st.text_input('Enter keywords of your reseach interest')
 
@@ -258,7 +273,7 @@ if st.session_state.clicked:
         st.session_state.clicked = False
         #st.write("Hello "+name+"! Please wait while we retrieve some information.")
         import time
-        with st.spinner(text='In progress'):
+        with st.spinner(text="Hello "+name+"! Please wait while we retrieve some information."):
             output=cosine_recommender(keywords)           
             data_dict = json.loads(output)
             
@@ -285,7 +300,7 @@ if st.session_state.clicked:
                         msg="\nTop 3 recommended advisor list based on LDA Topic modeling:\n"
                         for i in range(len(lda1['LDA_rank'])):
                             msg+=str(i+1)+'. name: '+ lda1['LDA_Name'][i]
-                            #msg+='. Cosine similarity score: '+str(data_dict['Similarity Score'][i])
+                            msg+='. Similarity score: '+str(lda1['Score'][i])
                             msg+='. Keywords: '+lda1['Keywords_LDA'][i]+'\n'
                         f.write(msg)
             if "lda2" not in st.session_state:
@@ -320,22 +335,94 @@ if st.session_state.clicked:
             You may explain based on research interests are similar, and why. If the user asks about the cosine similarity score, which has a value of 0 to 1, you may use different examples to describe the similarity score.\
             You respond in a short, very conversational friendly style. 
             """}]
-                response="Welcome "+name+"! Would you like recommendation explaination?"
+                response="Welcome "+name+"! Would you like an explanation of your recommendation for advisors?"
                 st.session_state.messages.append({"role": "assistant", "content": response})
 if "flag" in st.session_state:
     df1 = pd.DataFrame(st.session_state["flag"])
     df2 = pd.DataFrame(st.session_state["lda1"])
     df3 = pd.DataFrame(st.session_state["lda2"])
     
-    left_column, right_column = st.columns(2)
+    #left_column, right_column = st.columns(2)
+    left_column, right_column = st.tabs(["Text Similarity", "Topic Similarity"])
     with left_column:
-        df1_new = df1[['Ranking', 'Name']]
-        st.write("Top Text Similarity Recommendations:")
-        st.dataframe(df1_new, hide_index=True)
+        df1_new = df1                 
+        df1_new = df1_new.to_dict(orient='records')
+        st.write("Top 3 recommended advisor based on Text Similarity of keywords:")
+        #st.dataframe(df1_new, hide_index=True)
+        columnDefs = [
+          {
+            'headerName': "Ranking",
+            'field': "Ranking",
+            # here the Athlete column will tooltip the Country value
+            'tooltipField': "Ranking",
+            'headerTooltip': "Advisor ranking based on cosine similarity",
+            'width': 10, 
+            
+          },
+            {
+            'field': "Name",
+            'tooltipValueGetter': JsCode("""function(p) {return "Paper List: \n"+p.data.Publication}"""),
+            'headerTooltip': "Advisor Information",
+            'width': 20, 
+          },
+          {
+            'field': "Affiliation",
+            'tooltipValueGetter': JsCode("""function(p) {return " Affiliation: \n"+p.data.Affiliation}"""),
+            'headerTooltip': "Advisor Affiliation",
+            'width': 120, 
+          },
+          
+          ];
+        gridOptions =  {
+              'defaultColDef': {
+                'flex': 1,
+                
+                
+                
+              },
+              'rowData': df1_new,
+              'columnDefs': columnDefs,
+              'tooltipShowDelay': 200,
+            };
+        AgGrid(None, gridOptions,  height = 120,allow_unsafe_jscode=True)
+
     with right_column:
-        st.write("Top Topic Similarity Recommendations:")
-        df2_new = df2[['LDA_rank','LDA_Name' ]]
-        st.dataframe(df2_new,hide_index=True)
+        st.write("Top 3 recommended advisor based on LDA Topic Similarity of 30 topics:")
+        df2_new = df2
+        df2_new = df2_new.to_dict(orient='records')
+        #st.dataframe(df2_new,hide_index=True, column_config={
+        #"LDA_rank": "Ranking","LDA_Name": "Name"})
+        columnDefs = [
+          {
+            'headerName': "Ranking",
+            'field': "LDA_rank",
+            # here the Athlete column will tooltip the Country value
+            'tooltipField': "LDA_rank",
+            'headerTooltip': "Advisor ranking based on cosine similarity",
+          },
+            {'headerName': "Name",
+            'field': "LDA_Name",
+            'tooltipValueGetter': JsCode("""function(p) {return "Paper List: \n"+p.data.Publication}"""),
+            'headerTooltip': "Advisor Information",
+            'width': 20, 
+          },
+          {
+            'field': "Affiliation",
+            'tooltipValueGetter': JsCode("""function(p) {return " Affiliation: \n"+p.data.Affiliation}"""),
+            'headerTooltip': "Advisor Affiliation",
+            'width': 120, 
+          },];
+        gridOptions =  {
+              'defaultColDef': {
+                'flex': 1,
+                'minWidth': 100,
+              },
+              'rowData': df2_new,
+              'columnDefs': columnDefs,
+              'tooltipShowDelay': 500,
+            };
+        AgGrid(None, gridOptions,  height = 120,allow_unsafe_jscode=True)
+
     
 
     
