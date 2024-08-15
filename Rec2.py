@@ -329,8 +329,8 @@ if st.session_state.clicked:
                 with open('rec_result.txt', 'r') as f:
                                 for line in f:
                                     msg+=line
-                              
-                st.session_state.messages = [{'role':'system', 'content':msg+"""
+                                    
+                prompt="""
             An Advisor Recommendation System where recommendations are generated based on two models: text similarity and LDA topic similarity between the user's research interests and those of potential advisors.
  Input: You are given a username and three recommended advisor names to the user based on each model. You are also provided with user research interests, and research interests of three recommended advisors. 
 Objective: To guide users through understanding the reasoning behind advisor recommendations based on cosine similarity, and LDA topic similarity. The goal is to enhance users' technical comprehension of how their research interests align with those of the recommended advisors.
@@ -338,8 +338,17 @@ Expected Outcome: Users should gain a clear understanding of why specific adviso
 Do not provide overly technical jargon unless asked by the user. Do not give lengthy explanations; keep responses concise and user-friendly. Do not assume the user understands complex mathematical concepts; provide examples when necessary.
 Model Output:
  
-            """}]
-                response="Welcome "+name+"! Would you like an explanation of your recommendation for advisors?"
+            """
+                st.session_state.messages = [{'role':'system', 'content':msg+prompt}]
+                #response="Welcome "+name+"! Would you like an explanation of your recommendation for advisors?"
+                client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+                response = client.chat.completions.create(
+                        model=st.session_state["openai_model"],
+                        messages=[
+                            {"role": "system", "content": msg+prompt}
+                        ]
+                    )
+                response=response.choices[0].message.content
                 st.session_state.messages.append({"role": "assistant", "content": response})
 if "flag" in st.session_state:
     df1 = pd.DataFrame(st.session_state["flag"])
