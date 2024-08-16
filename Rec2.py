@@ -7,6 +7,8 @@ from  scipy.spatial.distance import cosine
 from heapq import nsmallest,nlargest
 from openai import OpenAI
 from st_aggrid import AgGrid, JsCode, GridOptionsBuilder
+import mysql.connector
+from mysql.connector import Error
 
 st.set_page_config("Advisor Recommendation", page_icon=":book:")
 data = pd.read_csv('updated_dataframe.csv')
@@ -19,6 +21,21 @@ Term_set=[]
 
 with open('Term_set.json', 'r') as f:
         Term_set = json.load(f)
+
+def insert_message(connection, role, content):
+    cursor = connection.cursor()
+    cursor.execute("INSERT INTO chat_messages (role, content) VALUES (%s, %s)", (role, content))
+    connection.commit()
+    
+def connect_to_db():
+    return mysql.connector.connect(
+        host=st.secrets["HOST"],
+        port=st.secrets["PORT"],
+        user=st.secrets["USER"],
+        password=st.secrets["PASSWORD"],
+        database=st.secrets["DATABASE"]  # Replace with your actual database name
+    )        
+        
 
 def tokenize(txt):
   txt=str(txt)
@@ -335,11 +352,11 @@ if st.session_state.clicked:
  Input: You are given a username and three recommended advisor names to the user based on each model. You are also provided with user research interests, and research interests of three recommended advisors. 
 Objective: To guide users through understanding the reasoning behind advisor recommendations based on cosine similarity, and LDA topic similarity. The goal is to enhance users' technical comprehension of how their research interests align with those of the recommended advisors.
 Expected Outcome: Users should gain a clear understanding of why specific advisors were recommended, with explanations tailored to their research interests. Users should be able to grasp the concepts of cosine similarity, topic similarity via LDA, and accurately interpret recommendation scores.
-Do not provide overly technical jargon unless asked by the user. Do not give lengthy explanations; keep responses concise and user-friendly. Do not assume the user understands complex mathematical concepts; provide examples when necessary.
+Do not provide overly technical jargon unless asked by the user. Do not give lengthy explanations; keep responses short, concise and user-friendly. Do not assume the user understands complex mathematical concepts; provide examples when necessary.
 Model Output:
  
             """
-                st.session_state.messages = [{'role':'system', 'content':msg+prompt}]
+                st.session_state.messages = [{'role':'system', 'content':prompt+msg}]
                 #response="Welcome "+name+"! Would you like an explanation of your recommendation for advisors?"
                 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
                 response = client.chat.completions.create(
@@ -350,6 +367,11 @@ Model Output:
                     )
                 response=response.choices[0].message.content
                 st.session_state.messages.append({"role": "assistant", "content": response})
+                connection = connect_to_db()
+                insert_message(connection, "LLM", response)
+                connection.close()
+                
+                
 if "flag" in st.session_state:
     df1 = pd.DataFrame(st.session_state["flag"])
     df2 = pd.DataFrame(st.session_state["lda1"])
@@ -471,6 +493,10 @@ if "messages"  in st.session_state:
             )
             response = st.write_stream(stream)
         st.session_state.messages.append({"role": "assistant", "content": response})
+        connection = connect_to_db()
+        insert_message(connection, name, prompt)
+        insert_message(connection, "LLM", response)
+        connection.close()
                 
 
                
