@@ -380,83 +380,31 @@ if "flag" in st.session_state:
     #left_column, right_column = st.columns(2)
     left_column, right_column = st.tabs(["Text Similarity", "Topic Similarity"])
     with left_column:
-        df1_new = df1                 
+        df1_new = df1[['Ranking','Name','Publication','Affiliation']]                
         df1_new = df1_new.to_dict(orient='records')
         st.write("Top 3 recommended advisor based on Text Similarity of keywords:")
-        #st.dataframe(df1_new, hide_index=True)
-        columnDefs = [
-          {
-            'headerName': "Ranking",
-            'field': "Ranking",
-            # here the Athlete column will tooltip the Country value
-            'tooltipField': "Ranking",
-            'headerTooltip': "Advisor ranking based on cosine similarity",
-            'width': 10, 
-            
-          },
-            {
-            'field': "Name",
-            'tooltipValueGetter': JsCode("""function(p) {return "Paper List: \n"+p.data.Publication}"""),
-            'headerTooltip': "Advisor Information",
-            'width': 20, 
-          },
-          {
-            'field': "Affiliation",
-            'tooltipValueGetter': JsCode("""function(p) {return " Affiliation: \n"+p.data.Affiliation}"""),
-            'headerTooltip': "Advisor Affiliation",
-            'width': 120, 
-          },
-          
-          ];
-        gridOptions =  {
-              'defaultColDef': {
-                'flex': 1,
-                
-                
-                
-              },
-              'rowData': df1_new,
-              'columnDefs': columnDefs,
-              'tooltipShowDelay': 200,
-            };
-        AgGrid(None, gridOptions,  height = 120,allow_unsafe_jscode=True)
+        st.dataframe(df1_new, hide_index=True,  column_config={
+        "Publication": st.column_config.Column(
+            width="large",
+            required=True,
+        ),
+         "Affiliation": st.column_config.Column(
+            width="medium",
+            required=True,
+        )
+    },)
+
 
     with right_column:
         st.write("Top 3 recommended advisor based on LDA Topic Similarity of 30 topics:")
-        df2_new = df2
+        df2_new = df2[['LDA_rank','LDA_Name','Publication','Affiliation']] 
         df2_new = df2_new.to_dict(orient='records')
-        #st.dataframe(df2_new,hide_index=True, column_config={
-        #"LDA_rank": "Ranking","LDA_Name": "Name"})
-        columnDefs = [
-          {
-            'headerName': "Ranking",
-            'field': "LDA_rank",
-            # here the Athlete column will tooltip the Country value
-            'tooltipField': "LDA_rank",
-            'headerTooltip': "Advisor ranking based on cosine similarity",
-          },
-            {'headerName': "Name",
-            'field': "LDA_Name",
-            'tooltipValueGetter': JsCode("""function(p) {return "Paper List: \n"+p.data.Publication}"""),
-            'headerTooltip': "Advisor Information",
-            'width': 20, 
-          },
-          {
-            'field': "Affiliation",
-            'tooltipValueGetter': JsCode("""function(p) {return " Affiliation: \n"+p.data.Affiliation}"""),
-            'headerTooltip': "Advisor Affiliation",
-            'width': 120, 
-          },];
-        gridOptions =  {
-              'defaultColDef': {
-                'flex': 1,
-                'minWidth': 100,
-              },
-              'rowData': df2_new,
-              'columnDefs': columnDefs,
-              'tooltipShowDelay': 500,
-            };
-        AgGrid(None, gridOptions,  height = 120,allow_unsafe_jscode=True)
+        st.dataframe(df2_new,hide_index=True, column_config={
+        "LDA_rank": "Ranking","LDA_Name": "Name", "Publication": st.column_config.Column(
+            width="large",
+            required=True,
+        ),})
+
 
     
 
